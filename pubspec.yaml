@@ -7,8 +7,22 @@ environment:
   sdk: ^3.6.1
 
 dependencies:
+  adaptive_dialog: ^2.4.0
+  appflowy_board: ^0.1.2
+  cloud_firestore: ^5.6.2
+  file_picker: ^8.1.7
+  firebase_auth: ^5.4.1
+  firebase_core: ^3.10.1
+  firebase_storage: ^12.4.1
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_svg: ^2.0.17
+  get: ^4.7.2
+  image_picker: ^1.1.2
+  intl: any
+  kanban_board: ^0.1.0
 
 dev_dependencies:
   flutter_test:
@@ -17,3 +31,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/flags/

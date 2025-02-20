@@ -1,0 +1,10 @@
+{
+  "username": "Nombre de usuario",
+  "password": "Contraseña",
+  "enter_username": "Por favor, ingrese su nombre de usuario",
+  "enter_password": "Por favor, ingrese su contraseña",
+  "processing_data": "Procesando datos...",
+  "login": "Iniciar sesión",
+  "social_feed": "Feed Social",
+  "caption": "Subtítulo"
+}

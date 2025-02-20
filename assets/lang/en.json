@@ -1,0 +1,10 @@
+{
+  "username": "Username",
+  "password": "Password",
+  "enter_username": "Please enter your username",
+  "enter_password": "Please enter your password",
+  "processing_data": "Processing data...",
+  "login": "Login",
+  "social_feed": "Social Feed",
+  "caption": "Caption"
+}
