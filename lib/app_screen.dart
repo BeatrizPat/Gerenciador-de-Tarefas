@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:appflowy_board/appflowy_board.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   runApp(const AppScreen());
@@ -31,54 +32,86 @@ class _AppScreenState extends State<AppScreen> {
   void initState() {
     super.initState();
     boardController = AppFlowyBoardScrollController();
-    final group1 = AppFlowyGroupData(id: "To Do", name: "To Do", items: [
-      TextItem("Card 1"),
-      TextItem("Card 2"),
-      RichTextItem(title: "Card 3", subtitle: 'Aug 1, 2020 4:05 PM'),
-      TextItem("Card 4"),
-      TextItem("Card 5"),
-    ]);
 
-    final group2 = AppFlowyGroupData(
-      id: "In Progress",
-      name: "In Progress",
-      items: <AppFlowyGroupItem>[
-        TextItem("Card 6"),
-        RichTextItem(title: "Card 7", subtitle: 'Aug 1, 2020 4:05 PM'),
-        RichTextItem(title: "Card 8", subtitle: 'Aug 1, 2020 4:05 PM'),
-      ],
-    );
-
-    final group3 = AppFlowyGroupData(
-        id: "Pending",
-        name: "Pending",
-        items: <AppFlowyGroupItem>[
-          TextItem("Card 9"),
-          RichTextItem(title: "Card 10", subtitle: 'Aug 1, 2020 4:05 PM'),
-          TextItem("Card 11"),
-          TextItem("Card 12"),
-        ]);
-    final group4 = AppFlowyGroupData(
-        id: "Canceled",
-        name: "Canceled",
-        items: <AppFlowyGroupItem>[
-          TextItem("Card 13"),
-          TextItem("Card 14"),
-          TextItem("Card 15"),
-        ]);
-    final group5 = AppFlowyGroupData(
-        id: "Urgent",
-        name: "Urgent",
-        items: <AppFlowyGroupItem>[
-          TextItem("Card 14"),
-          TextItem("Card 15"),
-        ]);
+    final group1 = AppFlowyGroupData(id: "Tarefas", name: "Tarefas", items: []);
+    final group2 = AppFlowyGroupData(id: "Em andamento", name: "Em andamento", items: []);
+    final group3 = AppFlowyGroupData(id: "Concluídas", name: "Concluídas", items: []);
 
     controller.addGroup(group1);
     controller.addGroup(group2);
     controller.addGroup(group3);
-    controller.addGroup(group4);
-    controller.addGroup(group5);
+  }
+
+  void _addCard() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final TextEditingController cardController = TextEditingController();
+        DateTime? selectedDate;
+
+        return AlertDialog(
+          title: Text('Adicionar Card'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: cardController,
+                decoration: InputDecoration(hintText: 'Nome do Card'),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () async {
+                  selectedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2101),
+                  );
+                },
+                child: Text('Selecionar Data'),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Adicionar'),
+              onPressed: () {
+                if (cardController.text.isNotEmpty && selectedDate != null) {
+                  final newItem = RichTextItem(
+                    title: cardController.text,
+                    subtitle: DateFormat('yyyy-MM-dd').format(selectedDate!),
+                  );
+                  setState(() {
+                    controller.getGroupController("Tarefas")?.add(newItem);
+                  });
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _editDate(RichTextItem item) async {
+    DateTime? selectedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (selectedDate != null) {
+      setState(() {
+        item.subtitle = DateFormat('yyyy-MM-dd').format(selectedDate);
+      });
+    }
   }
 
   @override
@@ -90,7 +123,7 @@ class _AppScreenState extends State<AppScreen> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('AppFlowy Board'),
+          title: const Text('Gerenciador de tarefas'),
         ),
         body: AppFlowyBoard(
           controller: controller,
@@ -101,22 +134,11 @@ class _AppScreenState extends State<AppScreen> {
             );
           },
           boardScrollController: boardController,
-          footerBuilder: (context, columnData) {
-            return AppFlowyGroupFooter(
-              icon: const Icon(Icons.add, size: 20),
-              title: const Text('New'),
-              height: 50,
-              margin: config.groupBodyPadding,
-              onAddButtonClick: () {
-                boardController.scrollToBottom(columnData.id);
-              },
-            );
-          },
           headerBuilder: (context, columnData) {
             return AppFlowyGroupHeader(
               icon: const Icon(Icons.lightbulb_circle),
               title: SizedBox(
-                width: 60,
+                width: 120,
                 child: TextField(
                   controller: TextEditingController()
                     ..text = columnData.headerData.groupName,
@@ -127,14 +149,16 @@ class _AppScreenState extends State<AppScreen> {
                   },
                 ),
               ),
-              addIcon: const Icon(Icons.add, size: 20),
-              moreIcon: const Icon(Icons.more_horiz, size: 20),
               height: 50,
               margin: config.groupBodyPadding,
             );
           },
-          groupConstraints: const BoxConstraints.tightFor(width: 240),
+          groupConstraints: const BoxConstraints.tightFor(width: 300),
           config: config,
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: _addCard,
+          child: Icon(Icons.add),
         ),
       ),
     );
@@ -152,7 +176,7 @@ class _AppScreenState extends State<AppScreen> {
     }
 
     if (item is RichTextItem) {
-      return RichTextCard(item: item);
+      return RichTextCard(item: item, onEditDate: _editDate);
     }
 
     throw UnimplementedError();
@@ -161,8 +185,10 @@ class _AppScreenState extends State<AppScreen> {
 
 class RichTextCard extends StatefulWidget {
   final RichTextItem item;
+  final Function(RichTextItem) onEditDate;
   const RichTextCard({
     required this.item,
+    required this.onEditDate,
     Key? key,
   }) : super(key: key);
 
@@ -186,10 +212,19 @@ class _RichTextCardState extends State<RichTextCard> {
               textAlign: TextAlign.left,
             ),
             const SizedBox(height: 10),
-            Text(
-              widget.item.subtitle,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            )
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  widget.item.subtitle,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                IconButton(
+                  icon: Icon(Icons.calendar_today),
+                  onPressed: () => widget.onEditDate(widget.item),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -207,8 +242,8 @@ class TextItem extends AppFlowyGroupItem {
 }
 
 class RichTextItem extends AppFlowyGroupItem {
-  final String title;
-  final String subtitle;
+  String title;
+  String subtitle;
 
   RichTextItem({required this.title, required this.subtitle});
 
