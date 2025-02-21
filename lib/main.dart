@@ -71,9 +71,17 @@ class _MainAppState extends State<MainApp> {
             ),
           ],
         ),
-        body: Center(
-          child: LoginScreen(),
-        ),
+        // body: Center(
+        //   child: LoginScreen(),
+        // ),
+        body: Column(children: [
+          LoginScreen(),
+          SizedBox(height: 40),
+          Text("Feito por:"),
+          SizedBox(height: 10),
+          Text("Beatriz Patricio Santos"),
+          Text("Carlos Henrique de França")
+        ],),
       ),
     );
   }
