@@ -36,11 +36,11 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        width: 300, // Ajuste a largura do formulário
-        height: 300, // Ajuste a altura do formulário
+        width: 300,
+        height: 300,
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-          color: Colors.white, // Cor de fundo do formulário
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(20.0),
           boxShadow: [
             BoxShadow(
@@ -100,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 controller: _usernameController,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context)!.translate('username'),
-                  labelStyle: TextStyle(color: Color.fromARGB(255, 124, 124, 124)),
+                  labelStyle: TextStyle(color: Theme.of(context).textTheme.bodyMedium!.color),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -113,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 controller: _passwordController,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context)!.translate('password'),
-                  labelStyle: TextStyle(color: Color.fromARGB(255, 124, 124, 124)),
+                  labelStyle: TextStyle(color: Theme.of(context).textTheme.bodyMedium!.color),
                 ),
                 obscureText: true,
                 validator: (value) {
@@ -142,14 +142,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           SnackBar(
                             content: Text(AppLocalizations.of(context)!.translate('processing_data')),
                           ),
-                       );
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) => AppScreen()),
-                      );
-                  }
+                        );
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (context) => AppScreen()),
+                        );
+                      }
                     }
                   });
-                  /**/
                 },
                 child: Text(AppLocalizations.of(context)!.translate('login')),
               ),

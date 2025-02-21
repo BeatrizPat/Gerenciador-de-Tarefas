@@ -199,44 +199,42 @@ class _AppScreenState extends State<AppScreen> {
 }
  
   @override
-  Widget build(BuildContext context) {
-    final config = AppFlowyBoardConfig(
-      groupBackgroundColor: HexColor.fromHex('#F7F8FC'),
-      stretchGroupHeight: false,
-    );
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Gerenciador de tarefas'),
-        ),
-        body: AppFlowyBoard(
-          controller: controller,
-          cardBuilder: (context, group, groupItem) {
-            return AppFlowyGroupCard(
-              key: ValueKey(groupItem.id),
-              child: _buildCard(groupItem),
-            );
-          },
-          boardScrollController: boardController,
-          headerBuilder: (context, columnData) {
-            return AppFlowyGroupHeader(
-              icon: const Icon(Icons.lightbulb_circle),
-              title: Text(columnData.headerData.groupName),
-              height: 50,
-              margin: config.groupBodyPadding,
-            );
-          },
-          groupConstraints: const BoxConstraints.tightFor(width: 300),
-          config: config,
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _addCard,
-          child: Icon(Icons.add),
-        ),
-      ),
-    );
-  }
-
+ @override
+Widget build(BuildContext context) {
+  final config = AppFlowyBoardConfig(
+    groupBackgroundColor: HexColor.fromHex('#F7F8FC'),
+    stretchGroupHeight: false,
+  );
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('Gerenciador de tarefas'),
+    ),
+    body: AppFlowyBoard(
+      controller: controller,
+      cardBuilder: (context, group, groupItem) {
+        return AppFlowyGroupCard(
+          key: ValueKey(groupItem.id),
+          child: _buildCard(groupItem),
+        );
+      },
+      boardScrollController: boardController,
+      headerBuilder: (context, columnData) {
+        return AppFlowyGroupHeader(
+          icon: const Icon(Icons.lightbulb_circle),
+          title: Text(columnData.headerData.groupName),
+          height: 50,
+          margin: config.groupBodyPadding,
+        );
+      },
+      groupConstraints: const BoxConstraints.tightFor(width: 300),
+      config: config,
+    ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: _addCard,
+      child: Icon(Icons.add),
+    ),
+  );
+}
   Widget _buildCard(AppFlowyGroupItem item) {
     if (item is RichTextItem) {
       return RichTextCard(item: item);
@@ -251,12 +249,31 @@ class RichTextCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(item.title),
-      subtitle: Text(item.subtitle),
+    return Card(
+      color: Theme.of(context).cardColor, // Cor do card de acordo com o tema
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              item.title,
+              style: Theme.of(context).textTheme.titleMedium, // Herda cor do tema
+            ),
+            const SizedBox(height: 5),
+            Text(
+              item.subtitle,
+              style: Theme.of(context).textTheme.bodyMedium, // Herda cor do tema
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
+
 
 class RichTextItem extends AppFlowyGroupItem {
   String title;

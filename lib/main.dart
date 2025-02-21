@@ -29,6 +29,7 @@ class MainApp extends StatefulWidget {
 
 class _MainAppState extends State<MainApp> {
   Locale _locale = const Locale('en', 'US');
+  ThemeMode _themeMode = ThemeMode.dark;
 
   void setLocale(Locale locale) {
     setState(() {
@@ -36,10 +37,19 @@ class _MainAppState extends State<MainApp> {
     });
   }
 
+  void toggleTheme() {
+    setState(() {
+      _themeMode = _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       locale: _locale,
+      themeMode: _themeMode,
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
       localizationsDelegates: [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -52,9 +62,17 @@ class _MainAppState extends State<MainApp> {
         const Locale('es', 'ES'),
       ],
       home: Scaffold(
+        appBar: AppBar(
+          title: Text("App"),
+          actions: [
+            IconButton(
+              icon: Icon(_themeMode == ThemeMode.light ? Icons.dark_mode : Icons.light_mode),
+              onPressed: toggleTheme,
+            ),
+          ],
+        ),
         body: Center(
           child: LoginScreen(),
-          //child: AppScreen(),
         ),
       ),
     );
