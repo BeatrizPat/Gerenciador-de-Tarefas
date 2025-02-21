@@ -16,11 +16,12 @@ class AppScreen extends StatefulWidget {
   State<AppScreen> createState() => _AppScreenState();
 }
 
-class _AppScreenState extends State<AppScreen> {
+class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
   final AppFlowyBoardController controller = AppFlowyBoardController();
   late AppFlowyBoardScrollController boardController;
   bool _isWriting = false;
   bool _isLoadingCircular = false;
+  late AnimationController _animationController;
 
   Future<List<AppFlowyGroupData>> fetchTasks() async {
     try {
@@ -69,6 +70,10 @@ class _AppScreenState extends State<AppScreen> {
   void initState() {
     super.initState();
     boardController = AppFlowyBoardScrollController();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    )..forward();
   }
 
   void _addCard() {
@@ -159,86 +164,89 @@ class _AppScreenState extends State<AppScreen> {
       stretchGroupHeight: false,
     );
 
-    return Scaffold(
-       appBar: AppBar(
-        title: const Text('Gerenciador de tarefas'),
-        bottom: _isWriting
-            ? const PreferredSize(
-                preferredSize: Size.fromHeight(4),
-                child: LinearProgressIndicator(),
-              )
-            : null,
-      ),
-      bottomNavigationBar: CurvedNavigationBar(
-    backgroundColor: Colors.blueAccent,
-    items: <Widget>[
-      Icon(Icons.add_circle, size: 30),
-      Icon(Icons.help, size: 30),
-    ],
-    onTap: (index) {
-      if (index == 0) _addCard();
-      // Add codigo do botao de ajuda
-      if (index == 1) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Ajuda'),
-              content: const Text('- Para adicionar uma tarefa, clique no botão + e preencha o nome da tarefa, junto da sua data/prazo \n- Para alterar o status da tarefa, clique e arraste a tarefa para a coluna desejada'),
-              actions: <Widget>[
-                TextButton(
-                  child: const Text('Fechar'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
+    return FadeTransition(
+      opacity: _animationController,
+      child: Scaffold(
+         appBar: AppBar(
+          title: const Text('Gerenciador de tarefas'),
+          bottom: _isWriting
+              ? const PreferredSize(
+                  preferredSize: Size.fromHeight(4),
+                  child: LinearProgressIndicator(),
+                )
+              : null,
+        ),
+        bottomNavigationBar: CurvedNavigationBar(
+      backgroundColor: Colors.blueAccent,
+      items: <Widget>[
+        Icon(Icons.add_circle, size: 30),
+        Icon(Icons.help, size: 30),
+      ],
+      onTap: (index) {
+        if (index == 0) _addCard();
+        // Add codigo do botao de ajuda
+        if (index == 1) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Ajuda'),
+                content: const Text('- Para adicionar uma tarefa, clique no botão + e preencha o nome da tarefa, junto da sua data/prazo \n- Para alterar o status da tarefa, clique e arraste a tarefa para a coluna desejada'),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text('Fechar'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      },
+    ),
+        body: _isLoadingCircular
+            ? const Center(child: CircularProgressIndicator())
+            : FutureBuilder<List<AppFlowyGroupData>>(
+          future: fetchTasks(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return const Center(child: Text("Erro ao carregar tarefas"));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(child: Text("Nenhuma tarefa encontrada"));
+            }
+
+            final groups = snapshot.data!;
+            controller.clear(); // Limpa os grupos antes de adicionar os novos
+            for (var group in groups) {
+              controller.addGroup(group);
+            }
+
+            return AppFlowyBoard(
+              controller: controller,
+              cardBuilder: (context, group, groupItem) {
+                return AppFlowyGroupCard(
+                  key: ValueKey(groupItem.id),
+                  child: _buildCard(groupItem),
+                );
+              },
+              boardScrollController: boardController,
+              headerBuilder: (context, columnData) {
+                return AppFlowyGroupHeader(
+                  icon: const Icon(Icons.lightbulb_circle),
+                  title: Text(columnData.headerData.groupName),
+                  height: 50,
+                  margin: config.groupBodyPadding,
+                );
+              },
+              groupConstraints: const BoxConstraints.tightFor(width: 300),
+              config: config,
             );
           },
-        );
-      }
-    },
-  ),
-      body: _isLoadingCircular
-          ? const Center(child: CircularProgressIndicator())
-          : FutureBuilder<List<AppFlowyGroupData>>(
-        future: fetchTasks(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return const Center(child: Text("Erro ao carregar tarefas"));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("Nenhuma tarefa encontrada"));
-          }
-
-          final groups = snapshot.data!;
-          controller.clear(); // Limpa os grupos antes de adicionar os novos
-          for (var group in groups) {
-            controller.addGroup(group);
-          }
-
-          return AppFlowyBoard(
-            controller: controller,
-            cardBuilder: (context, group, groupItem) {
-              return AppFlowyGroupCard(
-                key: ValueKey(groupItem.id),
-                child: _buildCard(groupItem),
-              );
-            },
-            boardScrollController: boardController,
-            headerBuilder: (context, columnData) {
-              return AppFlowyGroupHeader(
-                icon: const Icon(Icons.lightbulb_circle),
-                title: Text(columnData.headerData.groupName),
-                height: 50,
-                margin: config.groupBodyPadding,
-              );
-            },
-            groupConstraints: const BoxConstraints.tightFor(width: 300),
-            config: config,
-          );
-        },
+        ),
       ),
     );
   }
