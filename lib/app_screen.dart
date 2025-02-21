@@ -155,7 +155,7 @@ class _AppScreenState extends State<AppScreen> {
       bottomNavigationBar: CurvedNavigationBar(
     backgroundColor: Colors.blueAccent,
     items: <Widget>[
-      Icon(Icons.add, size: 30),
+      Icon(Icons.add_circle, size: 30),
       Icon(Icons.help, size: 30),
     ],
     onTap: (index) {
