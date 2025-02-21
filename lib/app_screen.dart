@@ -25,14 +25,21 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
 
   Future<List<AppFlowyGroupData>> fetchTasks() async {
     try {
-      String userEmail = FirebaseAuth.instance.currentUser!.email!;
+      String userEmail = FirebaseAuth.instance.currentUser?.email ?? '';
+      if (userEmail.isEmpty) {
+        throw Exception('User email is null');
+      }
+
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('cards_tarefas')
           .where('user', isEqualTo: userEmail)
           .get();
 
       List<Map<String, dynamic>> allCardsUser =
-          snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+          snapshot.docs.map((doc) => {
+            'docId': doc.id,
+            ...doc.data() as Map<String, dynamic>
+          }).toList();
 
       List<Map<String, dynamic>> pendenteCards =
           allCardsUser.where((card) => card['status'] == 'Pendente').toList();
@@ -56,13 +63,15 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
     return AppFlowyGroupData(
       id: groupName,
       name: groupName,
-      items: List<AppFlowyGroupItem>.from(cards
-          .map((card) => RichTextItem(
-                title: card['titulo'],
-                subtitle: DateFormat('yyyy-MM-dd').format(
-                    (card['data'] as Timestamp).toDate()),
-              ))
-          .toList()),
+      items: List<AppFlowyGroupItem>.from(cards.map((card) {
+        final data = card['data'];
+        final date = data != null ? (data as Timestamp).toDate() : DateTime.now();
+        return RichTextItem(
+          docId: card['docId'] ?? '',
+          title: card['titulo'] ?? '',
+          subtitle: DateFormat('yyyy-MM-dd').format(date),
+        );
+      }).toList()),
     );
   }
 
@@ -120,7 +129,11 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
               child: const Text('Adicionar'),
               onPressed: () async {
                 if (cardController.text.isNotEmpty && selectedDate != null) {
-                  String userEmail = FirebaseAuth.instance.currentUser!.email!;
+                  String userEmail = FirebaseAuth.instance.currentUser?.email ?? '';
+                  if (userEmail.isEmpty) {
+                    print("Erro: User email is null");
+                    return;
+                  }
 
                   final newCard = {
                     'titulo': cardController.text,
@@ -157,6 +170,17 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
     );
   }
 
+  void _deleteCard(String docId) async {
+    try {
+      await FirebaseFirestore.instance.collection('cards_tarefas').doc(docId).delete();
+      setState(() {
+        controller.removeGroupItem('Tarefas', docId); // Replace 'Tarefas' with the appropriate groupId if needed
+      });
+    } catch (e) {
+      print("Erro ao deletar card no Firestore: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final config = AppFlowyBoardConfig(
@@ -179,8 +203,8 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
         bottomNavigationBar: CurvedNavigationBar(
       backgroundColor: Colors.blueAccent,
       items: <Widget>[
-        Icon(Icons.add_circle, size: 30, color: Colors.blueAccent,),
-        Icon(Icons.help, size: 30, color: Colors.blueAccent,),
+        Icon(Icons.add_circle, size: 30, color: const Color.fromARGB(255, 131, 144, 165),),
+        Icon(Icons.help, size: 30, color: const Color.fromARGB(255, 131, 144, 165),),
       ],
       onTap: (index) {
         if (index == 0) _addCard();
@@ -252,19 +276,18 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildCard(AppFlowyGroupItem item) {
-  if (item is RichTextItem) {
-    return RichTextCard(item: item);
+    if (item is RichTextItem) {
+      return RichTextCard(item: item, onDelete: _deleteCard);
+    }
+    // Retorna um espaço vazio para itens temporários ou desconhecidos
+    return const SizedBox.shrink();
   }
-  // Retorna um espaço vazio para itens temporários ou desconhecidos
-  return const SizedBox.shrink();
-}
-
-
 }
 
 class RichTextCard extends StatelessWidget {
   final RichTextItem item;
-  const RichTextCard({required this.item, Key? key}) : super(key: key);
+  final Function(String) onDelete;
+  const RichTextCard({required this.item, required this.onDelete, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -277,9 +300,18 @@ class RichTextCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              item.title,
-              style: Theme.of(context).textTheme.titleMedium,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  item.title,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => onDelete(item.docId),
+                ),
+              ],
             ),
             const SizedBox(height: 5),
             Text(
@@ -294,13 +326,14 @@ class RichTextCard extends StatelessWidget {
 }
 
 class RichTextItem extends AppFlowyGroupItem {
+  String docId;
   String title;
   String subtitle;
 
-  RichTextItem({required this.title, required this.subtitle});
+  RichTextItem({required this.docId, required this.title, required this.subtitle});
 
   @override
-  String get id => title;
+  String get id => docId;
 }
 
 extension HexColor on Color {
