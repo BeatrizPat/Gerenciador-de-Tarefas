@@ -161,6 +161,25 @@ class _AppScreenState extends State<AppScreen> {
     onTap: (index) {
       if (index == 0) _addCard();
       // Add codigo do botao de ajuda
+      if (index == 1) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Ajuda'),
+              content: const Text('- Para adicionar uma tarefa, clique no botão + e preencha o nome da tarefa, junto da sua data/prazo \n- Para alterar o status da tarefa, clique e arraste a tarefa para a coluna desejada'),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Fechar'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
     },
   ),
       body: FutureBuilder<List<AppFlowyGroupData>>(
