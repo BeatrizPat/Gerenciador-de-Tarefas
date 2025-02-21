@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_trabalho_final/app_localizations.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences_web/shared_preferences_web.dart';
 
 void main() {
   runApp(const AppScreen());
