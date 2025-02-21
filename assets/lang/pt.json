@@ -5,6 +5,18 @@
   "enter_password": "Por favor, insira sua senha",
   "processing_data": "Processando dados...",
   "login": "Entrar",
-  "social_feed": "Feed Social",
-  "caption": "Legenda"
+  "gerenciador": "Gerenciador de Tarefas",
+  "tarefas": "Tarefas",
+  "andamento": "Em andamento",
+  "concluidas": "Concluídas",
+  "adicionar_tarefa": "Adicionar Tarefa",
+  "ajuda": "Ajuda",
+  "fechar": "Fechar",
+  "salvar": "Salvar",
+  "selecionar_data": "Selecione a data",
+  "add_card": "Adicionar Cartão",
+  "nome_card" : "Nome do Cartão",
+  "adicionar": "Adicionar",
+  "cancelar": "Cancelar",
+  "ajuda_texto": "- Para adicionar uma tarefa, clique no botão + e preencha o nome da tarefa, junto da sua data/prazo \n- Para alterar o status da tarefa, clique e arraste a tarefa para a coluna desejada"
 }

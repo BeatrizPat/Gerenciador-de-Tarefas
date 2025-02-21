@@ -6,5 +6,19 @@
   "processing_data": "Procesando datos...",
   "login": "Iniciar sesión",
   "social_feed": "Feed Social",
-  "caption": "Subtítulo"
+  "caption": "Subtítulo",
+  "gerenciador": "Administrador de Tareas",
+  "tarefas": "Tareas",
+  "andamento": "En progreso",
+  "concluidas": "Completadas",
+  "adicionar_tarefa": "Agregar Tarea",
+  "ajuda": "Ayuda",
+  "fechar": "Cerrar",
+  "salvar": "Guardar",
+  "selecionar_data": "Seleccionar fecha",
+  "add_card": "Agregar Tarjeta",
+  "nome_card": "Nombre de la Tarjeta",
+  "adicionar": "Agregar",
+  "cancelar": "Cancelar",
+  "ajuda_texto": "- Para agregar una tarea, haga clic en el botón + y complete el nombre de la tarea junto con su fecha/límite \n- Para cambiar el estado de la tarea, haga clic y arrastre la tarea a la columna deseada"
 }

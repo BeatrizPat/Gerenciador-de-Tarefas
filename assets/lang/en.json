@@ -6,5 +6,19 @@
   "processing_data": "Processing data...",
   "login": "Login",
   "social_feed": "Social Feed",
-  "caption": "Caption"
+  "caption": "Caption",
+  "gerenciador": "Task Manager",
+  "tarefas": "Tasks",
+  "andamento": "In progress",
+  "concluidas": "Completed",
+  "adicionar_tarefa": "Add Task",
+  "ajuda": "Help",
+  "fechar": "Close",
+  "salvar": "Save",
+  "selecionar_data": "Select date",
+  "add_card": "Add Card",
+  "nome_card": "Card Name",
+  "adicionar": "Add",
+  "cancelar": "Cancel",
+  "ajuda_texto": "- To add a task, click the + button and fill in the task name along with its date/deadline \n- To change the task status, click and drag the task to the desired column"
 }

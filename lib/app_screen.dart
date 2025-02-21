@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:flutter_trabalho_final/app_localizations.dart';
 
 void main() {
   runApp(const AppScreen());
@@ -49,9 +50,9 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
           allCardsUser.where((card) => card['status'] == 'Concluído').toList();
 
       return [
-        _buildGroup("Tarefas", pendenteCards),
-        _buildGroup("Em andamento", emAndamentoCards),
-        _buildGroup("Concluídas", concluidoCards),
+        _buildGroup(AppLocalizations.of(context)!.translate('tarefas'), pendenteCards),
+        _buildGroup(AppLocalizations.of(context)!.translate('andamento'), emAndamentoCards),
+        _buildGroup(AppLocalizations.of(context)!.translate('concluidas'), concluidoCards),
       ];
     } catch (e) {
       print('Erro ao carregar tarefas: $e');
@@ -93,13 +94,13 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
         DateTime? selectedDate;
 
         return AlertDialog(
-          title: const Text('Adicionar Card'),
+          title: Text(AppLocalizations.of(context)!.translate('add_card')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: cardController,
-                decoration: const InputDecoration(hintText: 'Nome do Card'),
+                decoration: InputDecoration(hintText: AppLocalizations.of(context)!.translate('nome_card').toString()),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
@@ -114,19 +115,19 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
                     selectedDate = pickedDate;
                   }
                 },
-                child: const Text('Selecionar Data'),
+                child: Text(AppLocalizations.of(context)!.translate('selecionar_data')),
               ),
             ],
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Cancelar'),
+              child: Text(AppLocalizations.of(context)!.translate('cancelar')),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('Adicionar'),
+              child: Text(AppLocalizations.of(context)!.translate('adicionar')),
               onPressed: () async {
                 if (cardController.text.isNotEmpty && selectedDate != null) {
                   String userEmail = FirebaseAuth.instance.currentUser?.email ?? '';
@@ -174,7 +175,7 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
     try {
       await FirebaseFirestore.instance.collection('cards_tarefas').doc(docId).delete();
       setState(() {
-        controller.removeGroupItem('Tarefas', docId); // Replace 'Tarefas' with the appropriate groupId if needed
+        controller.removeGroupItem(AppLocalizations.of(context)!.translate('tarefas'), docId); // Replace 'Tarefas' with the appropriate groupId if needed
       });
     } catch (e) {
       print("Erro ao deletar card no Firestore: $e");
@@ -192,7 +193,7 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
       opacity: _animationController,
       child: Scaffold(
          appBar: AppBar(
-          title: const Text('Gerenciador de tarefas'),
+          title: Text(AppLocalizations.of(context)!.translate('gerenciador')),
           bottom: _isWriting
               ? const PreferredSize(
                   preferredSize: Size.fromHeight(4),
@@ -201,7 +202,7 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
               : null,
         ),
         bottomNavigationBar: CurvedNavigationBar(
-      backgroundColor: Colors.blueAccent,
+      backgroundColor: const Color.fromARGB(255, 131, 144, 165),
       items: <Widget>[
         Icon(Icons.add_circle, size: 30, color: const Color.fromARGB(255, 131, 144, 165),),
         Icon(Icons.help, size: 30, color: const Color.fromARGB(255, 131, 144, 165),),
@@ -214,11 +215,11 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: const Text('Ajuda'),
-                content: const Text('- Para adicionar uma tarefa, clique no botão + e preencha o nome da tarefa, junto da sua data/prazo \n- Para alterar o status da tarefa, clique e arraste a tarefa para a coluna desejada'),
+                title: Text(AppLocalizations.of(context)!.translate('ajuda')),
+                content: Text(AppLocalizations.of(context)!.translate('ajuda_texto')),
                 actions: <Widget>[
                   TextButton(
-                    child: const Text('Fechar'),
+                    child: Text(AppLocalizations.of(context)!.translate('fechar')),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
@@ -261,7 +262,10 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
               headerBuilder: (context, columnData) {
                 return AppFlowyGroupHeader(
                   icon: const Icon(Icons.lightbulb_circle),
-                  title: Text(columnData.headerData.groupName),
+                  title: Text(
+                    columnData.headerData.groupName,
+                    style: const TextStyle(color: Colors.black),
+                  ),
                   height: 50,
                   margin: config.groupBodyPadding,
                 );
