@@ -19,6 +19,7 @@ class AppScreen extends StatefulWidget {
 class _AppScreenState extends State<AppScreen> {
   final AppFlowyBoardController controller = AppFlowyBoardController();
   late AppFlowyBoardScrollController boardController;
+  bool _isWriting = false;
 
   Future<List<AppFlowyGroupData>> fetchTasks() async {
     try {
@@ -123,6 +124,7 @@ class _AppScreenState extends State<AppScreen> {
                   };
 
                   try {
+                    setState(() => _isWriting = true);
                     await FirebaseFirestore.instance
                         .collection('cards_tarefas')
                         .add(newCard);
@@ -131,6 +133,8 @@ class _AppScreenState extends State<AppScreen> {
                     Navigator.of(context).pop();
                   } catch (e) {
                     print("Erro ao adicionar card no Firestore: $e");
+                  } finally {
+                    setState(() => _isWriting = false);
                   }
                 }
               },
@@ -151,6 +155,12 @@ class _AppScreenState extends State<AppScreen> {
     return Scaffold(
        appBar: AppBar(
         title: const Text('Gerenciador de tarefas'),
+        bottom: _isWriting
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(4),
+                child: LinearProgressIndicator(),
+              )
+            : null,
       ),
       bottomNavigationBar: CurvedNavigationBar(
     backgroundColor: Colors.blueAccent,
