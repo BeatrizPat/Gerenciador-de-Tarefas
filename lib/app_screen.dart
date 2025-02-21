@@ -20,6 +20,7 @@ class _AppScreenState extends State<AppScreen> {
   final AppFlowyBoardController controller = AppFlowyBoardController();
   late AppFlowyBoardScrollController boardController;
   bool _isWriting = false;
+  bool _isLoadingCircular = false;
 
   Future<List<AppFlowyGroupData>> fetchTasks() async {
     try {
@@ -124,7 +125,10 @@ class _AppScreenState extends State<AppScreen> {
                   };
 
                   try {
-                    setState(() => _isWriting = true);
+                    setState(() {
+                      _isWriting = true;
+                      _isLoadingCircular = true;
+                    });
                     await FirebaseFirestore.instance
                         .collection('cards_tarefas')
                         .add(newCard);
@@ -134,7 +138,10 @@ class _AppScreenState extends State<AppScreen> {
                   } catch (e) {
                     print("Erro ao adicionar card no Firestore: $e");
                   } finally {
-                    setState(() => _isWriting = false);
+                    setState(() {
+                      _isWriting = false;
+                      _isLoadingCircular = false;
+                    });
                   }
                 }
               },
@@ -192,7 +199,9 @@ class _AppScreenState extends State<AppScreen> {
       }
     },
   ),
-      body: FutureBuilder<List<AppFlowyGroupData>>(
+      body: _isLoadingCircular
+          ? const Center(child: CircularProgressIndicator())
+          : FutureBuilder<List<AppFlowyGroupData>>(
         future: fetchTasks(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
