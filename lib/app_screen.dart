@@ -3,6 +3,7 @@ import 'package:appflowy_board/appflowy_board.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
 void main() {
   runApp(const AppScreen());
@@ -148,9 +149,20 @@ class _AppScreenState extends State<AppScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(
+       appBar: AppBar(
         title: const Text('Gerenciador de tarefas'),
       ),
+      bottomNavigationBar: CurvedNavigationBar(
+    backgroundColor: Colors.blueAccent,
+    items: <Widget>[
+      Icon(Icons.add, size: 30),
+      Icon(Icons.help, size: 30),
+    ],
+    onTap: (index) {
+      if (index == 0) _addCard();
+      // Add codigo do botao de ajuda
+    },
+  ),
       body: FutureBuilder<List<AppFlowyGroupData>>(
         future: fetchTasks(),
         builder: (context, snapshot) {
@@ -189,10 +201,6 @@ class _AppScreenState extends State<AppScreen> {
             config: config,
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addCard,
-        child: const Icon(Icons.add),
       ),
     );
   }
