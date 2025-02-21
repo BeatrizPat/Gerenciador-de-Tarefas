@@ -30,27 +30,77 @@ class _AppScreenState extends State<AppScreen> {
 
   late AppFlowyBoardScrollController boardController;
 
-  Future<List<Map<String, dynamic>>> fetchCollectionByUserId(String collectionName, String userId) async {
+  Future<List<Map<String, dynamic>>> fetchCollectionByUserId(
+      String collectionName, String userId) async {
     try {
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection(collectionName)
-          .where('user', isEqualTo: userId) // Filtrando pelo ID do usuário
+          .where('user', isEqualTo: userId)
           .get();
-      
-      return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+
+      return snapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .toList();
     } catch (e) {
       print('Erro ao carregar dados: $e');
       return [];
     }
   }
 
+  Future<void> loadData(String userId) async {
+    List<Map<String, dynamic>> allCardsUser =
+        await fetchCollectionByUserId('cards_tarefas', userId);
 
-  Future<List> loadData(String userId) async {
-    List<Map<String, dynamic>> data = await fetchCollectionByUserId('cards_tarefas', userId);
-    print(data);
-    return data;
+    List<Map<String, dynamic>> pendenteCards =
+        allCardsUser.where((card) => card['status'] == 'Pendente').toList();
+    List<Map<String, dynamic>> emAndamentoCards =
+        allCardsUser.where((card) => card['status'] == 'Em andamento').toList();
+    List<Map<String, dynamic>> concluidoCards =
+        allCardsUser.where((card) => card['status'] == 'Concluído').toList();
+
+    final group1 = AppFlowyGroupData(
+        id: "Tarefas", name: "Tarefas", items: List<AppFlowyGroupItem>.from([]));
+    final group2 = AppFlowyGroupData(id: "Em andamento", name: "Em andamento",
+        items: List<AppFlowyGroupItem>.from([]));
+    final group3 = AppFlowyGroupData(id: "Concluídas", name: "Concluídas",
+        items: List<AppFlowyGroupItem>.from([]));
+
+    setState(() {
+      controller.addGroup(group1);
+      controller.addGroup(group2);
+      controller.addGroup(group3);
+
+      for (var card in pendenteCards) {
+        controller.getGroupController("Tarefas")?.add(
+          RichTextItem(
+            title: card['titulo'],
+            subtitle: DateFormat('yyyy-MM-dd').format(
+                (card['data'] as Timestamp).toDate()), // Convertendo data
+          ),
+        );
+      }
+
+      for (var card in emAndamentoCards) {
+        controller.getGroupController("Em andamento")?.add(
+          RichTextItem(
+            title: card['titulo'],
+            subtitle: DateFormat('yyyy-MM-dd').format(
+                (card['data'] as Timestamp).toDate()),
+          ),
+        );
+      }
+
+      for (var card in concluidoCards) {
+        controller.getGroupController("Concluídas")?.add(
+          RichTextItem(
+            title: card['titulo'],
+            subtitle: DateFormat('yyyy-MM-dd').format(
+                (card['data'] as Timestamp).toDate()),
+          ),
+        );
+      }
+    });
   }
-
 
   @override
   void initState() {
@@ -58,97 +108,96 @@ class _AppScreenState extends State<AppScreen> {
     boardController = AppFlowyBoardScrollController();
 
     String userEmail = FirebaseAuth.instance.currentUser!.email!;
-
-    loadData(userEmail).then((allCardsUser) {
-      List pentendeCards = allCardsUser.where((card) => card['status'] == 'Pendente').toList();
-      print(pentendeCards);
-      List emAndamentoCards = allCardsUser.where((card) => card['status'] == 'Em andamento').toList();
-      print(emAndamentoCards);
-      List concluidoCards = allCardsUser.where((card) => card['status'] == 'Concluído').toList();
-      print(concluidoCards);
-    });
-
-    final group1 = AppFlowyGroupData(id: "Tarefas", name: "Tarefas", items: []);
-    final group2 = AppFlowyGroupData(id: "Em andamento", name: "Em andamento", items: []);
-    final group3 = AppFlowyGroupData(id: "Concluídas", name: "Concluídas", items: []);
-
-    controller.addGroup(group1);
-    controller.addGroup(group2);
-    controller.addGroup(group3);
+    loadData(userEmail);
   }
 
   void _addCard() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        final TextEditingController cardController = TextEditingController();
-        DateTime? selectedDate;
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      final TextEditingController cardController = TextEditingController();
+      DateTime? selectedDate;
 
-        return AlertDialog(
-          title: Text('Adicionar Card'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: cardController,
-                decoration: InputDecoration(hintText: 'Nome do Card'),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  selectedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2101),
-                  );
-                },
-                child: Text('Selecionar Data'),
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+      return AlertDialog(
+        title: Text('Adicionar Card'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: cardController,
+              decoration: InputDecoration(hintText: 'Nome do Card'),
             ),
-            TextButton(
-              child: Text('Adicionar'),
-              onPressed: () {
-                if (cardController.text.isNotEmpty && selectedDate != null) {
-                  final newItem = RichTextItem(
-                    title: cardController.text,
-                    subtitle: DateFormat('yyyy-MM-dd').format(selectedDate!),
-                  );
-                  setState(() {
-                    controller.getGroupController("Tarefas")?.add(newItem);
-                  });
-                  Navigator.of(context).pop();
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () async {
+                DateTime? pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2101),
+                );
+                if (pickedDate != null) {
+                  selectedDate = pickedDate;
                 }
               },
+              child: Text('Selecionar Data'),
             ),
           ],
-        );
-      },
-    );
-  }
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Cancelar'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: Text('Adicionar'),
+            onPressed: () async {
+              if (cardController.text.isNotEmpty && selectedDate != null) {
+                String userEmail =
+                    FirebaseAuth.instance.currentUser!.email!; // Obtém o e-mail
 
-  void _editDate(RichTextItem item) async {
-    DateTime? selectedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
-    if (selectedDate != null) {
-      setState(() {
-        item.subtitle = DateFormat('yyyy-MM-dd').format(selectedDate);
-      });
-    }
-  }
+                // Criando o novo card
+                final newCard = {
+                  'titulo': cardController.text,
+                  'data': Timestamp.fromDate(selectedDate!),
+                  'status': 'Pendente',
+                  'user': userEmail,
+                };
 
+                try {
+                  // Adicionando ao Firestore
+                  await FirebaseFirestore.instance
+                      .collection('cards_tarefas')
+                      .add(newCard);
+
+                  // Atualizando a UI localmente
+                  setState(() {
+                    var groupController =
+                        controller.getGroupController("Tarefas");
+                    if (groupController != null) {
+                      groupController.add(RichTextItem(
+                        title: cardController.text,
+                        subtitle:
+                            DateFormat('yyyy-MM-dd').format(selectedDate!),
+                      ));
+                    }
+                  });
+
+                  Navigator.of(context).pop(); // Fecha o diálogo
+                } catch (e) {
+                  print("Erro ao adicionar card no Firestore: $e");
+                }
+              }
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+ 
   @override
   Widget build(BuildContext context) {
     final config = AppFlowyBoardConfig(
@@ -172,18 +221,7 @@ class _AppScreenState extends State<AppScreen> {
           headerBuilder: (context, columnData) {
             return AppFlowyGroupHeader(
               icon: const Icon(Icons.lightbulb_circle),
-              title: SizedBox(
-                width: 120,
-                child: TextField(
-                  controller: TextEditingController()
-                    ..text = columnData.headerData.groupName,
-                  onSubmitted: (val) {
-                    controller
-                        .getGroupController(columnData.headerData.groupId)!
-                        .updateGroupName(val);
-                  },
-                ),
-              ),
+              title: Text(columnData.headerData.groupName),
               height: 50,
               margin: config.groupBodyPadding,
             );
@@ -200,80 +238,24 @@ class _AppScreenState extends State<AppScreen> {
   }
 
   Widget _buildCard(AppFlowyGroupItem item) {
-    if (item is TextItem) {
-      return Align(
-        alignment: Alignment.centerLeft,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-          child: Text(item.s),
-        ),
-      );
-    }
-
     if (item is RichTextItem) {
-      return RichTextCard(item: item, onEditDate: _editDate);
+      return RichTextCard(item: item);
     }
-
     throw UnimplementedError();
   }
 }
 
-class RichTextCard extends StatefulWidget {
+class RichTextCard extends StatelessWidget {
   final RichTextItem item;
-  final Function(RichTextItem) onEditDate;
-  const RichTextCard({
-    required this.item,
-    required this.onEditDate,
-    Key? key,
-  }) : super(key: key);
+  const RichTextCard({required this.item, Key? key}) : super(key: key);
 
-  @override
-  State<RichTextCard> createState() => _RichTextCardState();
-}
-
-class _RichTextCardState extends State<RichTextCard> {
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.item.title,
-              style: const TextStyle(fontSize: 14),
-              textAlign: TextAlign.left,
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  widget.item.subtitle,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-                IconButton(
-                  icon: Icon(Icons.calendar_today),
-                  onPressed: () => widget.onEditDate(widget.item),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+    return ListTile(
+      title: Text(item.title),
+      subtitle: Text(item.subtitle),
     );
   }
-}
-
-class TextItem extends AppFlowyGroupItem {
-  final String s;
-
-  TextItem(this.s);
-
-  @override
-  String get id => s;
 }
 
 class RichTextItem extends AppFlowyGroupItem {
@@ -288,9 +270,6 @@ class RichTextItem extends AppFlowyGroupItem {
 
 extension HexColor on Color {
   static Color fromHex(String hexString) {
-    final buffer = StringBuffer();
-    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
-    buffer.write(hexString.replaceFirst('#', ''));
-    return Color(int.parse(buffer.toString(), radix: 16));
+    return Color(int.parse(hexString.replaceFirst('#', '0xFF')));
   }
 }
