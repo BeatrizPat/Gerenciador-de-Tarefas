@@ -179,8 +179,8 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
         bottomNavigationBar: CurvedNavigationBar(
       backgroundColor: Colors.blueAccent,
       items: <Widget>[
-        Icon(Icons.add_circle, size: 30),
-        Icon(Icons.help, size: 30),
+        Icon(Icons.add_circle, size: 30, color: Colors.blueAccent,),
+        Icon(Icons.help, size: 30, color: Colors.blueAccent,),
       ],
       onTap: (index) {
         if (index == 0) _addCard();
