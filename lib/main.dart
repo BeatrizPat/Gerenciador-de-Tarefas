@@ -29,7 +29,7 @@ class MainApp extends StatefulWidget {
 
 class _MainAppState extends State<MainApp> {
   Locale _locale = const Locale('en', 'US');
-  ThemeMode _themeMode = ThemeMode.light;
+  ThemeMode _themeMode = WidgetsBinding.instance.window.platformBrightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light;
 
   void setLocale(Locale locale) {
     setState(() {
