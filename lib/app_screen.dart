@@ -72,7 +72,7 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
     boardController = AppFlowyBoardScrollController();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 2000),
     )..forward();
   }
 
