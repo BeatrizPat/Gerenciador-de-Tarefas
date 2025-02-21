@@ -57,7 +57,9 @@ class _AppScreenState extends State<AppScreen> {
     super.initState();
     boardController = AppFlowyBoardScrollController();
 
-    loadData("user1@gmail.com").then((allCardsUser) {
+    String userEmail = FirebaseAuth.instance.currentUser!.email!;
+
+    loadData(userEmail).then((allCardsUser) {
       List pentendeCards = allCardsUser.where((card) => card['status'] == 'Pendente').toList();
       print(pentendeCards);
       List emAndamentoCards = allCardsUser.where((card) => card['status'] == 'Em andamento').toList();

@@ -53,8 +53,8 @@ class _MainAppState extends State<MainApp> {
       ],
       home: Scaffold(
         body: Center(
-          //child: LoginScreen(),
-          child: AppScreen(),
+          child: LoginScreen(),
+          //child: AppScreen(),
         ),
       ),
     );
