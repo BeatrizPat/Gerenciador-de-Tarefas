@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:appflowy_board/appflowy_board.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() {
   runApp(const AppScreen());
@@ -28,10 +30,41 @@ class _AppScreenState extends State<AppScreen> {
 
   late AppFlowyBoardScrollController boardController;
 
+  Future<List<Map<String, dynamic>>> fetchCollectionByUserId(String collectionName, String userId) async {
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection(collectionName)
+          .where('user', isEqualTo: userId) // Filtrando pelo ID do usuário
+          .get();
+      
+      return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+    } catch (e) {
+      print('Erro ao carregar dados: $e');
+      return [];
+    }
+  }
+
+
+  Future<List> loadData(String userId) async {
+    List<Map<String, dynamic>> data = await fetchCollectionByUserId('cards_tarefas', userId);
+    print(data);
+    return data;
+  }
+
+
   @override
   void initState() {
     super.initState();
     boardController = AppFlowyBoardScrollController();
+
+    loadData("user1@gmail.com").then((allCardsUser) {
+      List pentendeCards = allCardsUser.where((card) => card['status'] == 'Pendente').toList();
+      print(pentendeCards);
+      List emAndamentoCards = allCardsUser.where((card) => card['status'] == 'Em andamento').toList();
+      print(emAndamentoCards);
+      List concluidoCards = allCardsUser.where((card) => card['status'] == 'Concluído').toList();
+      print(concluidoCards);
+    });
 
     final group1 = AppFlowyGroupData(id: "Tarefas", name: "Tarefas", items: []);
     final group2 = AppFlowyGroupData(id: "Em andamento", name: "Em andamento", items: []);
