@@ -63,7 +63,7 @@ class _MainAppState extends State<MainApp> {
       ],
       home: Scaffold(
         appBar: AppBar(
-          title: Text("App"),
+          title: Text("Gerenciador de Tarefas - Login"),
           actions: [
             IconButton(
               icon: Icon(_themeMode == ThemeMode.light ? Icons.dark_mode : Icons.light_mode),
