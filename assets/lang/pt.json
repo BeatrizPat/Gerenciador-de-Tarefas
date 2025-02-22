@@ -18,5 +18,6 @@
   "nome_card" : "Nome do Cartão",
   "adicionar": "Adicionar",
   "cancelar": "Cancelar",
-  "ajuda_texto": "- Para adicionar uma tarefa, clique no botão + e preencha o nome da tarefa, junto da sua data/prazo \n- Para alterar o status da tarefa, clique e arraste a tarefa para a coluna desejada"
+  "ajuda_texto": "- Para adicionar uma tarefa, clique no botão + e preencha o nome da tarefa, junto da sua data/prazo \n- Para alterar o status da tarefa, clique e arraste a tarefa para a coluna desejada",
+  "feito_por": "Desenvolvido por"
 }

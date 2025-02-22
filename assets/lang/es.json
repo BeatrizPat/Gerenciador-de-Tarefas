@@ -20,5 +20,6 @@
   "nome_card": "Nombre de la Tarjeta",
   "adicionar": "Agregar",
   "cancelar": "Cancelar",
-  "ajuda_texto": "- Para agregar una tarea, haga clic en el botón + y complete el nombre de la tarea junto con su fecha/límite \n- Para cambiar el estado de la tarea, haga clic y arrastre la tarea a la columna deseada"
+  "ajuda_texto": "- Para agregar una tarea, haga clic en el botón + y complete el nombre de la tarea junto con su fecha/límite \n- Para cambiar el estado de la tarea, haga clic y arrastre la tarea a la columna deseada",
+  "feito_por": "Desarrollado por"
 }

@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:appflowy_board/appflowy_board.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_trabalho_final/app_localizations.dart';
-import 'package:go_router/go_router.dart';
-import 'package:shared_preferences_web/shared_preferences_web.dart';
-
 void main() {
   runApp(const AppScreen());
 }
@@ -204,7 +202,7 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
               : null,
         ),
         bottomNavigationBar: CurvedNavigationBar(
-      backgroundColor: const Color.fromARGB(255, 131, 144, 165),
+      backgroundColor: Theme.of(context).primaryColor,
       items: <Widget>[
         Icon(Icons.add_circle, size: 30, color: const Color.fromARGB(255, 131, 144, 165),),
         Icon(Icons.help, size: 30, color: const Color.fromARGB(255, 131, 144, 165),),

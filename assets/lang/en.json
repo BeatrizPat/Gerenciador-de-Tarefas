@@ -20,5 +20,6 @@
   "nome_card": "Card Name",
   "adicionar": "Add",
   "cancelar": "Cancel",
-  "ajuda_texto": "- To add a task, click the + button and fill in the task name along with its date/deadline \n- To change the task status, click and drag the task to the desired column"
+  "ajuda_texto": "- To add a task, click the + button and fill in the task name along with its date/deadline \n- To change the task status, click and drag the task to the desired column",
+  "feito_por": "Developed by"
 }
