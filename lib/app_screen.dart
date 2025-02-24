@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:appflowy_board/appflowy_board.dart';
 import 'package:intl/intl.dart';
@@ -25,6 +27,7 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
   bool _isWriting = false;
   bool _isLoadingCircular = false;
   late AnimationController _animationController;
+  Color _barColor = const Color.fromARGB(255, 131, 144, 165);
 
   Future<List<AppFlowyGroupData>> fetchTasks() async {
     try {
@@ -184,6 +187,24 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
     }
   }
 
+  void _changeBarColor() {
+    setState(() {
+
+      if (_barColor == Colors.red) {
+        _barColor = Colors.green;
+      } else if (_barColor == Colors.green) {
+        _barColor = Colors.orange;
+      } else if (_barColor == Colors.orange) {
+        _barColor = Colors.blue;
+      } else if (_barColor == Colors.blue) {
+        _barColor = Colors.red;
+      } else {
+        _barColor = Colors.red;
+      }
+
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final config = AppFlowyBoardConfig(
@@ -204,10 +225,11 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
               : null,
         ),
         bottomNavigationBar: CurvedNavigationBar(
-      backgroundColor: const Color.fromARGB(255, 131, 144, 165),
+      backgroundColor: _barColor,
       items: <Widget>[
-        Icon(Icons.add_circle, size: 30, color: const Color.fromARGB(255, 131, 144, 165),),
-        Icon(Icons.help, size: 30, color: const Color.fromARGB(255, 131, 144, 165),),
+        Icon(Icons.add_circle, size: 30, color: _barColor),
+        Icon(Icons.help, size: 30, color: _barColor),
+        Icon(Icons.color_lens, size: 30, color: _barColor),
       ],
       onTap: (index) {
         if (index == 0) _addCard();
@@ -231,6 +253,7 @@ class _AppScreenState extends State<AppScreen> with TickerProviderStateMixin {
             },
           );
         }
+        if (index == 2) _changeBarColor();
       },
     ),
         body: _isLoadingCircular
